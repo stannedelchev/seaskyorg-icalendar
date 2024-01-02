@@ -7,9 +7,9 @@ using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 using Ical.Net.Serialization;
 
-var urlOption = new Option<Uri>("--url", 
+var urlOption = new Option<Uri>("--url",
                                  () => Url.Create("http://www.seasky.org/astronomy/astronomy-calendar-2024.html"),
-                                 "The http://seasky.org page URL to convert to .ical format. Example: http://www.seasky.org/astronomy/astronomy-calendar-2024.html");
+                                 "The http://seasky.org page URL to convert to .ical format.");
 var rootCommand = new RootCommand("Convert an SeaSky.org page with astronomical events to .ical format for usage with various calendar software.")
 {
     urlOption
@@ -17,15 +17,18 @@ var rootCommand = new RootCommand("Convert an SeaSky.org page with astronomical 
 rootCommand.SetHandler(BuildCalendar, urlOption);
 return await rootCommand.InvokeAsync(args);
 
-async Task BuildCalendar(Uri url) {
+async Task BuildCalendar(Uri url)
+{
     var angleSharpDocument = await BrowsingContext.New(Configuration.Default.WithDefaultLoader())
                                                   .OpenAsync(url.ToString());
+    var year = int.Parse(angleSharpDocument.QuerySelector("h1")!.TextContent[^4..]); // "Astronomy Calendar of Celestial Events for Calendar Year 2024"
+
     var events = angleSharpDocument.QuerySelectorAll("div#right-column-content li p")
                                    .Select(e =>
                                    {
                                        var summary = GetSummary(e);
                                        var description = GetDescription(e);
-                                       var (start, end) = GetDate(e);
+                                       var (start, end) = GetDate(e, year);
                                        return new Event(summary, description, start, end);
                                    });
 
@@ -58,7 +61,7 @@ string GetDescription(IElement element)
     return content[descriptionStartIndex..].Trim();
 }
 
-(DateTime Start, DateTime End) GetDate(IElement element)
+(DateTime Start, DateTime End) GetDate(IElement element, int year)
 {
     var content = element.QuerySelector("span.date-text")!.TextContent.Trim('.').Trim();
     var dateRange = Regex.Match(content, @"(?<month>[a-zA-Z]+) (?<dayStart>\d{1,2})(, )?(?<dayEnd>\d{1,2})?");
@@ -74,9 +77,9 @@ string GetDescription(IElement element)
     var dayStart = dateRange.Groups["dayStart"];
     var dayEnd = dateRange.Groups["dayEnd"];
 
-    var startDate = DateTime.ParseExact($"{month} {dayStart}", "MMMM d", CultureInfo.InvariantCulture);
+    var startDate = DateTime.ParseExact($"{month} {dayStart} {year}", "MMMM d yyyy", CultureInfo.InvariantCulture);
     var endDate = dateRange.Groups["dayEnd"].Success
-        ? DateTime.ParseExact($"{month} {dayEnd}", "MMMM d", CultureInfo.InvariantCulture)
+        ? DateTime.ParseExact($"{month} {dayEnd} {year}", "MMMM d yyyy", CultureInfo.InvariantCulture)
         : startDate;
 
     return (startDate, endDate.AddDays(1));
