@@ -8,7 +8,7 @@ Usage:
   SeaSkyICalendar [options]
 
 Options:
-  --url <url>     The http://seasky.org page URL to convert to .ical format. [default: http://www.seasky.org/astronomy/astronomy-calendar-2024.html]
+  --url <url>     The http://seasky.org page URL to convert to .ical format. [default: http://www.seasky.org/astronomy/astronomy-calendar-2025.html]
   --version       Show version information
   -?, -h, --help  Show help and usage information
 ```

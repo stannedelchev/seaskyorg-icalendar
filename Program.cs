@@ -8,7 +8,7 @@ using Ical.Net.DataTypes;
 using Ical.Net.Serialization;
 
 var urlOption = new Option<Uri>("--url",
-                                 () => Url.Create("http://www.seasky.org/astronomy/astronomy-calendar-2024.html"),
+                                 () => Url.Create("http://www.seasky.org/astronomy/astronomy-calendar-2025.html"),
                                  "The http://seasky.org page URL to convert to .ical format.");
 var rootCommand = new RootCommand("Convert an SeaSky.org page with astronomical events to .ical format for usage with various calendar software.")
 {
@@ -21,7 +21,7 @@ async Task BuildCalendar(Uri url)
 {
     var angleSharpDocument = await BrowsingContext.New(Configuration.Default.WithDefaultLoader())
                                                   .OpenAsync(url.ToString());
-    var year = int.Parse(angleSharpDocument.QuerySelector("h1")!.TextContent[^4..]); // "Astronomy Calendar of Celestial Events for Calendar Year 2024"
+    var year = int.Parse(angleSharpDocument.QuerySelector("h1")!.TextContent[^4..]); // "Astronomy Calendar of Celestial Events for Calendar Year 2025"
 
     var events = angleSharpDocument.QuerySelectorAll("div#right-column-content li p")
                                    .Select(e =>
